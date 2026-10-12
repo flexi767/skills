@@ -1,11 +1,23 @@
 ---
 name: diagnosing-bugs
-description: Diagnosis loop for hard bugs and performance regressions. Use when the user says "diagnose"/"debug this", or reports something broken/throwing/failing/slow.
+description: Reproduce and diagnose hard bugs, intermittent failures, and measured performance regressions. Use for a difficult defect or an explicit diagnosis request; answer simple troubleshooting questions directly.
+license: MIT
+metadata:
+  upstream-repository: mattpocock/skills
+  upstream-revision: 49dd158d1076134a641b33efb035946536778336
+  upstream-path: skills/engineering/diagnosing-bugs
+  fork-repository: flexi767/skills
 ---
 
 # Diagnosing Bugs
 
 A discipline for hard bugs. Skip phases only when explicitly justified.
+
+## Execution and scope
+
+Follow the workspace's resource limits. Check for existing heavy jobs before starting tests, builds, compilation, inference, or benchmarks; run one at a time in the foreground. Use relevant tests and bounded repro loops. In ScrapeUI, use its managed Bun entrypoints and never set `SCRAPEUI_VITEST_PARALLEL=1`. Subagents require an explicit user request for delegation; parallel agents additionally require an explicit request for parallel work. Persistent servers or model downloads require authorization and a cleanup plan.
+
+Choose routine repro and regression-test boundaries from the task and repository conventions, state material assumptions, and continue within existing authorization. Ask only for information or permission that is actually missing.
 
 When exploring the codebase, read `GLOSSARY.md` (if it exists) to get a clear mental model of the relevant modules, and check ADRs in the area you're touching.
 
@@ -29,7 +41,7 @@ Spend disproportionate effort here. **Be aggressive. Be creative. Refuse to give
 4. **Headless browser script** (Playwright / Puppeteer) that drives the UI and asserts on DOM/console/network.
 5. **Replay a captured trace.** Save a real network request / payload / event log to disk; replay it through the code path in isolation.
 6. **Throwaway harness.** Spin up a minimal subset of the system (one service, mocked deps) that exercises the bug code path with a single function call.
-7. **Property / fuzz loop.** If the bug is "sometimes wrong output", run 1000 random inputs and look for the failure mode.
+7. **Property / fuzz loop.** If the bug is "sometimes wrong output", use seeded inputs and a bounded sequential loop, increasing the budget only when the signal needs it.
 8. **Bisection harness.** If the bug appeared between two known states (commit, dataset, version), automate "boot at state X, check, repeat" so you can `git bisect run` it.
 9. **Differential loop.** Run the same input through old-version vs new-version (or two configs) and diff outputs.
 10. **HITL bash script.** Last resort. If a human must click, drive _them_ with `scripts/hitl-loop.template.sh` so the loop is still structured. Captured output feeds back to you.
@@ -48,11 +60,11 @@ A 30-second flaky loop is barely better than no loop; a 2-second deterministic o
 
 ### Non-deterministic bugs
 
-The goal is not a clean repro but a **higher reproduction rate**. Loop the trigger 100×, parallelise, add stress, narrow timing windows, inject sleeps. A 50%-flake bug is debuggable; 1% is not, so keep raising the rate until it's debuggable.
+The goal is not a clean repro but a **higher reproduction rate**. Start with bounded sequential repetitions, narrow timing windows, or controlled sleeps. If concurrent callers are essential to the bug, use the smallest bounded harness consistent with the workspace's resource limits; do not overlap heavy jobs. Record the seed, iteration count, and reproduction rate.
 
 ### When you genuinely cannot build a loop
 
-Stop and say so explicitly. List what you tried. Ask the user for: (a) access to whatever environment reproduces it, (b) a redacted captured artifact (HAR file, log dump, core dump, screen recording with timestamps), or (c) permission to add temporary production instrumentation. Do **not** proceed to hypothesise without a loop.
+State the limitation and what you tried. Request the specific missing environment access, redacted artifact, or authorization for production instrumentation, and continue independent read-only investigation. Keep any hypotheses explicitly provisional; do not claim a diagnosis or fix without evidence that exercises the reported symptom.
 
 ### Completion criterion: a tight loop that goes red
 
@@ -63,7 +75,7 @@ Phase 1 is done when the loop is **tight** and **red-capable**: you can name **o
 - [ ] **Fast**: seconds, not minutes.
 - [ ] **Agent-runnable**: you can run it unattended; a human in the loop only via `scripts/hitl-loop.template.sh`.
 
-If you catch yourself reading code to build a theory before this command exists, **stop: jumping straight to a hypothesis is the exact failure this skill prevents.** No red-capable command, no Phase 2.
+Read the relevant code as needed to construct the repro. Treat theories as provisional until a red-capable command exists; that command is the gate into Phase 2.
 
 ## Phase 2: Reproduce + minimise
 

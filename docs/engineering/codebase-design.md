@@ -1,10 +1,12 @@
 ## What it does
 
-`codebase-design` fixes the words you use to design a module: **module**, **interface**, **depth**, **seam**, **adapter**, **leverage**, **locality**. It defines each one precisely, bans the loose substitutes ("component", "service", "API", "boundary"), and states the handful of principles that follow from them.
+`codebase-design` fixes the words you use to design a module: **module**, **interface**, **depth**, **seam**, **adapter**, **leverage**, **locality**. It defines each one precisely and states the principles that follow from them, while preserving precise terminology already used by the project.
 
 It is a reference, not a process. It runs no loop, produces no artifact, and never stops to ask you a question. Every other skill that touches design uses its vocabulary. On its own, it gives you the words and stops. Know this before you invoke it. If you point a [session](https://www.aihero.dev/ai-coding-dictionary/session) at a skill with no process and no stopping rule and say "go", the agent invents a process. The questions below show what that looks like.
 
 ## When to reach for it
+
+These editable fork copies preserve existing user authorization and workspace conventions. Routine choices proceed autonomously; missing material information or authorization is requested only when necessary. This reference grants no new scope or permission for delegation or background jobs.
 
 Type `/codebase-design`, or the agent reaches for it automatically when a design task fits.
 
@@ -22,14 +24,14 @@ Several skills are close to it. Pick by the problem you have:
 
 ## The vocabulary
 
-The glossary is the skill. The skill defines every term against the others, and gives each one the word it replaces.
+The glossary clarifies interface design without requiring existing project concepts to be renamed.
 
-| Term | What it means | Don't say |
+| Term | What it means | Terminology note |
 |---|---|---|
-| **Module** | Anything with an interface and an implementation. Deliberately scale-agnostic: a function, a class, a package, a slice spanning tiers. | unit, component, service |
-| **Interface** | Everything a caller must know to use it correctly: the type signature, plus invariants, ordering constraints, error modes, required config, performance characteristics. | API, signature |
+| **Module** | Anything with an interface and an implementation. Deliberately scale-agnostic: a function, a class, a package, a slice spanning tiers. | Keep precise project names |
+| **Interface** | Everything a caller must know to use it correctly: the type signature, plus invariants, ordering constraints, error modes, required config, performance characteristics. | Include invariants beyond types |
 | **Depth** | Leverage at the interface: how much behaviour a caller or a test can exercise per unit of interface they have to learn. **Deep**: a lot of behaviour behind a small interface. **Shallow**: the interface is nearly as complex as the implementation. | none |
-| **Seam** | Michael Feathers' term: a place you can alter behaviour without editing in that place. It is the *location* of an interface, and where to put it is its own decision, separate from what goes behind it. | boundary |
+| **Seam** | Michael Feathers' term: a place you can alter behaviour without editing in that place. It is the *location* of an interface, and where to put it is its own decision, separate from what goes behind it. | Clarify which kind of boundary |
 | **Adapter** | A concrete thing satisfying an interface at a seam. It names a role, not a kind of thing: an in-memory fake and a Postgres repo are both adapters. | none |
 | **Leverage** | What callers get from depth: more capability per unit of interface learned. | none |
 | **Locality** | What maintainers get from depth: changes, bugs and verification stay in one place, so one fix covers every caller. | none |
@@ -43,7 +45,7 @@ The skill does *not* define depth as the ratio of implementation lines to interf
 - **The interface is the test surface.** Callers and tests cross the same seam. If you want to test *past* the interface, the module is the wrong shape.
 - **One adapter means a hypothetical seam. Two adapters means a real one.** Don't cut a seam until something varies across it. A single-adapter seam is just indirection.
 
-Two supporting files go further, and the skill reads them on demand rather than up front. [DEEPENING.md](https://github.com/mattpocock/skills/blob/main/skills/engineering/codebase-design/DEEPENING.md) classifies a candidate's dependencies into four categories (in-process, local-substitutable, remote-but-owned, true-external), because the category decides how you test the deepened module across its seam. [DESIGN-IT-TWICE.md](https://github.com/mattpocock/skills/blob/main/skills/engineering/codebase-design/DESIGN-IT-TWICE.md) starts parallel [sub-agents](https://www.aihero.dev/ai-coding-dictionary/subagent) to produce three or more radically different interfaces for the same module, then compares them on depth, locality and seam placement.
+Two supporting files go further, and the skill reads them on demand rather than up front. [DEEPENING.md](https://github.com/flexi767/skills/blob/main/skills/engineering/codebase-design/DEEPENING.md) classifies a candidate's dependencies into four categories (in-process, local-substitutable, remote-but-owned, true-external), because the category decides how you test the deepened module across its seam. [DESIGN-IT-TWICE.md](https://github.com/flexi767/skills/blob/main/skills/engineering/codebase-design/DESIGN-IT-TWICE.md) develops two or three contrasting interfaces sequentially in the current agent, then compares them on depth, locality and seam placement.
 
 ## Common questions
 
@@ -57,7 +59,7 @@ This is a known problem, filed as [issue #449](https://github.com/mattpocock/ski
 
 **Where did `design-an-interface` go? And is there an `/interface-design` skill?**
 
-This skill replaced `design-an-interface` and took over its content. Nothing is missing. Its "design it twice" technique (parallel sub-agents generating radically different designs, from Ousterhout) ships here as `DESIGN-IT-TWICE.md`. Separately, several people have asked for a dedicated `/interface-design` skill for the deep-module/thin-interface philosophy; this skill already covers that philosophy, and no separate skill is planned. If you came looking for either name, this is the page.
+This skill replaced `design-an-interface` and took over its content. Nothing is missing. Its "design it twice" technique (contrasting interface designs, from Ousterhout) ships here as `DESIGN-IT-TWICE.md`. Separately, several people have asked for a dedicated `/interface-design` skill for the deep-module/thin-interface philosophy; this skill already covers that philosophy, and no separate skill is planned. If you came looking for either name, this is the page.
 
 **Isn't this a file-structure convention, such as folders, barrel files, feature slices?**
 
@@ -69,7 +71,7 @@ It does now, but for a long time it did not. v1.0 removed the inline deep-module
 
 **Does the design-it-twice pattern work outside Claude Code?**
 
-Not cleanly. `DESIGN-IT-TWICE.md` says "spawn 3+ sub-agents in parallel using the Agent tool", and "Agent" is the name of a Claude Code [tool](https://www.aihero.dev/ai-coding-dictionary/tool). The repo ships metadata for other [harnesses](https://www.aihero.dev/ai-coding-dictionary/harness), including Codex, and those may have no tool with that name. So the parallel-design phase is less portable than the skill's metadata suggests. [Issue #564](https://github.com/mattpocock/skills/issues/564) tracks this, and it is open.
+Yes. This fork explores alternatives sequentially in the current agent and uses no harness-specific agent tool. Delegation requires an explicit user request, and parallel agents require an explicit parallel-work request. Heavy validation stays sequential and in the foreground under workspace resource limits.
 
 **Can I add my own concepts to the glossary, such as connascence, module secrets, [progressive disclosure](https://www.aihero.dev/ai-coding-dictionary/progressive-disclosure)?**
 
@@ -77,7 +79,7 @@ People have proposed those. [Issue #180](https://github.com/mattpocock/skills/is
 
 ## It's working if
 
-- The design conversation stops producing the words "component", "service" and "boundary", and starts producing "module", "interface" and "seam".
+- The design conversation uses clear definitions while preserving precise project terminology.
 - Someone can point at a proposed extraction and say whether it passes the deletion test, without hedging.
 - A proposed seam comes with a second adapter named, not just the first one.
 - Discussion of an interface covers invariants, ordering and error modes, not only the type signature.

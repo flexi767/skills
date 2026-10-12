@@ -10,6 +10,14 @@
 
 # Skills For Real Engineers
 
+## Local fork: three editable skills
+
+This fork maintains `diagnosing-bugs`, `codebase-design`, and `writing-for-agents` for local installation as ordinary editable copies. Their upstream baseline is `mattpocock/skills` at `49dd158d1076134a641b33efb035946536778336`; each skill records that revision and its original path in frontmatter metadata. The remaining upstream skills are retained in the fork but are outside this installation.
+
+Local adaptations keep heavy checks sequential and in the foreground, require explicit user requests for delegated or parallel agents, preserve existing authorization and project vocabulary, and use bounded repro loops. Routine test boundaries need no additional approval checkpoint. Codebase design stays within the requested scope, and agent-document pruning preserves required safeguards.
+
+Install only the three directories from an immutable fork commit with the Codex skill installer. Keep a receipt with that commit and installed-file hashes. Upstream or fork pulls do not update installed copies; review updates and preserve local edits explicitly. The upstream plugin and symlink installation workflows below install a broader, automatically changing set and are not used for these copies.
+
 [![skills.sh](https://skills.sh/b/mattpocock/skills)](https://skills.sh/mattpocock/skills)
 
 My agent skills that I use every day to do real engineering - not vibe coding.
